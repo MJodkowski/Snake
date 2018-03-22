@@ -55,20 +55,20 @@ class PlayingField {
             this.fruit = new Square(generateCoords(this.x, this.pixelSize, this.snake.body), generateCoords(this.y, this.pixelSize, this.snake.body), "green", this.pixelSize);
             //check if fruit is not on the snake
             while (this.snake.head.x === this.fruit.x &&
-                this.snake.head.y === this.fruit.y) {
+            this.snake.head.y === this.fruit.y) {
                 this.fruit = new Square;
             }
             for (let x = 0; x < this.snake.body.length; x++) {
                 if (this.snake.body[x]["x"] === this.fruit.x &&
-                    this.snake.body[x]["y"] === this.fruit.y) {
+                  this.snake.body[x]["y"] === this.fruit.y) {
                     console.log("boom!");
                     this.fruit = new Square(generateCoords(this.x, this.pixelSize, this.snake.body), generateCoords(this.y, this.pixelSize, this.snake.body), "green", this.pixelSize);
                     x = 0;
                 }
-            this.fruit.draw();
-        }
-        else {
-        this.snake.move(this.snake.head.direction);
+                this.fruit.draw();
+            }
+        } else {
+            this.snake.move(this.snake.head.direction);
         }
         //draw head in new position
         this.snake.head.draw();
