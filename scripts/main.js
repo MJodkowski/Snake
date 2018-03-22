@@ -60,7 +60,6 @@ class PlayingField {
                     console.log("boom!");
                     this.fruit = new Square(generateCoords(this.x, this.pixelSize, this.snake.body), generateCoords(this.y, this.pixelSize, this.snake.body), "green", this.pixelSize);
                     x = 0;
-                    }
                 }
             this.fruit.draw();
         }
