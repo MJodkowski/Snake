@@ -1,29 +1,45 @@
-var canvas = document.getElementById("canvas");
-var ctx = canvas.getContext("2d");
+const canvas = document.getElementById("canvas");
 
-//unify pixelsize
-//sort out starting issue
-//why cannot use for of loop in colldetect?
-//make it work for different sized blocks (find way to make canvas size multiple of pixel size)
+const PIXELSIZE = 50;
+
+
+
 class PlayingField {
     constructor (pixel) {
-        //borders for collision detection
-        this.x = canvas.width;
-        this.y = canvas.height;
         this.eatenFruit = 0;
         this.speed = 200;
         this.pixelSize = pixel;
         this.snake = new Snake(this.pixelSize);
-        this.fruit = new Square(generateCoords(this.x, this.pixelSize), generateCoords(this.y, this.pixelSize), "green", this.pixelSize);
-        this.keyCode;
+        this.moved = false;
+        this.dom = {
+            button: document.querySelector('.play-button'),
+            titleDiv: document.querySelector('.title-div'),
+            canvas: document.getElementById("canvas")
+        }
     }
     logKey (e) {
-        let keyCode = e.keyCode;
-        this.keyCode = keyCode;
+        this.keyCode = e.keyCode;
+        if (!this.moved && this.keyCode !== 40) {
+            this.game();
+            this.moved = true;
+        } 
     }
-    newGame() {
-        for (let x = 0; x < 2; x++) {
-           this.snake.body.push(new Square(0, 0, "black", this.pixelSize)); //DOES NOT TAKE IN VALUES!!!
+    initializeTitle() {
+        this.dom.button.addEventListener('click', ()=> {
+            this.dom.titleDiv.style.display = 'none';
+            this.dom.canvas.style.display = 'block';
+            this.initializeGame();
+        })
+    }
+    initializeGame() {
+        this.dom.canvas.width = this.pixelSize * 21;
+        this.dom.canvas.height = this.pixelSize * 10;
+        this.x = canvas.width;
+        this.y = canvas.height;
+        this.snake.head = new Square(this.x/2 - 0.5 * this.pixelSize, this.y/2, "black", this.pixelSize);
+        this.snake.body = [];
+        for (let x = 1; x < 3; x++) {
+           this.snake.body.push(new Square(this.snake.head.x, this.snake.head.y + this.pixelSize * x, "black", this.pixelSize)); //DOES NOT TAKE IN VALUES!!!
         }
         window.addEventListener("keydown", (e) => this.logKey(e), false);
         this.snake.head.draw();
@@ -32,21 +48,21 @@ class PlayingField {
             this.snake.body[x].draw();
         }
         //draw fruit
-        this.fruit.draw();
-        this.game();    
+        this.fruit = new Square(generateCoords(this.x, this.pixelSize), generateCoords(this.y, this.pixelSize), "green", this.pixelSize);
+        this.fruit.draw(); 
     }
     game() {
         //listen for key input and change direction
         this.changeDirection();
         //check for collision with wall
         if (collDetectWall(this.snake.head.x, this.snake.head.y, this.x, this.y, this.snake.head.direction, this.snake.head.pixelSize)) {
-            console.log("Wall!")
+            this.reset();
             return;
         }
         //collision with itself
         for (let x = 0; x < this.snake.body.length; x ++) {
             if (collDetect(this.snake.head.x, this.snake.head.y, this.snake.body[x]["x"], this.snake.body[x]["y"], this.snake.head.direction, this.pixelSize)) {
-                console.log("Coll!");
+                this.reset();
                 return;
             }
         }
@@ -58,7 +74,6 @@ class PlayingField {
                 if ((this.snake.body[x]["x"] === this.fruit.x &&
                     this.snake.body[x]["y"] === this.fruit.y) || (this.snake.head.x === this.fruit.x &&
                     this.snake.head.y === this.fruit.y)) {
-                    console.log("boom!");
                     this.fruit = new Square(generateCoords(this.x, this.pixelSize, this.snake.body), generateCoords(this.y, this.pixelSize, this.snake.body), "green", this.pixelSize);
                     x = 0;
                 }
@@ -95,32 +110,33 @@ class PlayingField {
     }
     eatFruit () {
         if (collDetect (this.snake.head.x, this.snake.head.y, this.fruit.x, this.fruit.y, this.snake.head.direction, this.pixelSize)){
-            // more elegant way?
-            console.log("nom!");
             this.snake.extend(this.snake.head.direction);
             this.speed -= 5;
             return true;
         }
     }
+    reset() {
+        this.dom.titleDiv.style.display = 'block';
+        this.dom.canvas.style.display = 'none';
+        this.moved = false;
+        this.speed = 200;
+    }
 }
 class Snake {
     constructor(pixel) {
         this.pixelSize = pixel;
-        this.head = new Square(0, 0, "black", this.pixelSize);
-        this.body = [];
     }
     move(direction) {
-        let popped = {};
+        let popped;
         this.body.unshift(new Square(this.head.x, this.head.y, "black", this.pixelSize))
-        popped = this.body.pop();
-        this.shift(direction);
-        popped.clear();
+        this.body.pop().clear();
+        this.slide(direction);
     }
     extend(direction) {
         this.body.unshift(new Square(this.head.x, this.head.y, "black", this.pixelSize));
-        this.shift(direction);
+        this.slide(direction);
     }
-    shift(direction) {
+    slide(direction) {
         switch (direction) {
             case "left":
                 this.head.x -= this.head.pixelSize;
@@ -139,17 +155,18 @@ class Snake {
 }
 class Square {
     constructor(x, y, color, size) {
+        this.ctx = canvas.getContext("2d");
         this.x = x;
         this.y = y;
         this.color = color;
         this.pixelSize = size;
     }
     draw () {
-        ctx.fillStyle = this.color;
-        ctx.fillRect(this.x, this.y, this.pixelSize, this.pixelSize);   
+        this.ctx.fillStyle = this.color;
+        this.ctx.fillRect(this.x, this.y, this.pixelSize, this.pixelSize);   
     }
     clear () {
-        ctx.clearRect (this.x, this.y, this.pixelSize, this.pixelSize);
+        this.ctx.clearRect (this.x, this.y, this.pixelSize, this.pixelSize); 
     }
 }
 
@@ -190,5 +207,5 @@ function collDetectWall (x, y, canvasX, canvasY, direction, pixels) {
 }
 
 // run program
-let playingField = new PlayingField(40);
-playingField.newGame();
+let playingField = new PlayingField(PIXELSIZE);
+playingField.initializeTitle();

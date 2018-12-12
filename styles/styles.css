@@ -1,9 +1,39 @@
 * { 
-    padding: 0; 
-    margin: 0; 
+    padding: 0;
+    font-family: 'Squada One', cursive;
+    /* margin: 0;  */
+}
+
+section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 95vh;
+}
+h1 {
+    width: 100%;
+    text-align: center;
+    font-size: 180px;
+    color: blue;
+    margin-top: 0;
+}
+.play-button {
+    width: 200px;
+    font-size: 25px;
+    display: block;
+    margin: 0 auto;
+    border: 2px solid darkblue;
+    background-color: blue;
+    border-radius: 10px;
+    color: mintcream;
+}
+.play-button:active {
+    color: darkgrey;
+    background-color: darkblue;
 }
 canvas {
     background: #eee; 
-    display: block; 
-    margin: 0 auto; 
+    display: none; 
+    margin: 0 auto;
+    border: 1px solid darkgray;
 }
